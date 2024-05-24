@@ -1,5 +1,3 @@
-> Necessário fazer o build da imagem e enviar para o registro interno do openshift
-
 Login no cluster
 
 ```
