@@ -1,0 +1,52 @@
+batch
+
+set FILE=/home/jboss/ojdbc8.jar
+set DB_DRIVER_NAME=oracle
+set DB_JDBC_URL=${env.DB_JDBC_URL}
+set DB_USERNAME=${env.DB_USERNAME}
+set DB_PASSWORD=${env.DB_PASSWORD}
+
+module add --name=com.oracle --resources=$FILE  --dependencies=javax.api,javax.resource.api
+
+/subsystem=datasources/jdbc-driver=$DB_DRIVER_NAME:add( \
+  driver-name=$DB_DRIVER_NAME, \
+  driver-module-name=com.oracle, \
+  driver-class-name=oracle.jdbc.driver.OracleDriver, \
+  driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource \
+)
+
+/subsystem=datasources/data-source=KeycloakDS:remove()
+
+/subsystem=datasources/data-source=KeycloakDS:add( \
+  jndi-name=java:jboss/datasources/KeycloakDS, \
+  enabled=true, \
+  use-java-context=true, \
+  connection-url=$DB_JDBC_URL, \
+  driver-name=$DB_DRIVER_NAME, \
+  user-name=$DB_USERNAME, \
+  password=$DB_PASSWORD \
+)
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=background-validation, value=true)
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=background-validation-millis, value=30000)
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=validate-on-match, value=false)
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=check-valid-connection-sql, value=select 1)
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=valid-connection-checker-class-name, value=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker)
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=stale-connection-checker-class-name, value=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker)
+
+ /subsystem=datasources/data-source=KeycloakDS:write-attribute(name=exception-sorter-class-name, value=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter)
+
+/subsystem=datasources/data-source=KeycloakDS:write-attribute(name=min-pool-size, value=30)
+
+/subsystem=datasources/data-source=KeycloakDS:write-attribute(name=max-pool-size, value=30)
+
+/subsystem=datasources/data-source=KeycloakDS:write-attribute(name=prepared-statements-cache-size, value=100)
+
+/subsystem=datasources/data-source=KeycloakDS:write-attribute(name=flush-strategy, value=IdleConnections)
+
+run-batch
